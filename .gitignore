@@ -1,0 +1,13 @@
+*.o
+*.exe
+*.aux
+*.log
+*.d
+*.dia.autosave
+*.synctex.gz
+*.bbl
+*.out
+*.lot
+*.lof
+.metadata
+/.project
