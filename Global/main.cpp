@@ -50,7 +50,7 @@ int main(int argc, char** argv)
   int option = -1;
 	unsigned long col_ini, col_end, row_ini, row_end;
 	int signum = 0, mode = 2;
-  unsigned long num;
+  unsigned long num, size = 0;
 	char filename[256];
 
   if(argc == 2) {
@@ -79,8 +79,8 @@ int main(int argc, char** argv)
 	      scanf(" %s", filename);
       }
 	    mesh.ReadFile(filename);
-      printf("\nTotal de %d nodes\n", mesh.getNodesSize());
-      global = gsl_matrix_alloc(mesh.getNodesSize(), mesh.getNodesSize());
+      size = mesh.getNodesSize();
+      global = gsl_matrix_alloc(size, size);
       printf("Matriz global de %d x %d\n", mesh.getNodesSize(), mesh.getNodesSize());
 	    break;
 
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
   		break;
   	case 7:
   	{
-  		unsigned long nodeInp, nodeOut;
+  		unsigned long nodeInp, nodeOut, refInp, refOut;
   		double input;
   		printf("\nAlocando vetores de tamanho %lu\n", global->size1);
   		vI = gsl_vector_alloc(global->size1);
@@ -153,11 +153,25 @@ int main(int argc, char** argv)
   		printf("\nCorrente de Entrada: ");
   		scanf("%lf", &input);
   		printf("Input Node: ");
-  		scanf("%lu", &nodeInp);
+  		while (1) {
+        scanf("%lu", &nodeInp);
+        refInp = mesh.getNodeReference(nodeInp);
+        if (refInp < size)
+          break;
+        printf("Invalid Node Number. Input Node: ");
+      }
+      
   		printf("Output Node: ");
-  		scanf("%lu", &nodeOut);
-  		gsl_vector_set(vI, nodeInp - 1, input);
-  		gsl_vector_set(vI, nodeOut - 1, -input);
+  		while (1) {
+        scanf("%lu", &nodeOut);
+        refOut = mesh.getNodeReference(nodeOut);
+        if (refOut < size)
+          break;
+        printf("Invalid Node Number. Output Node: ");
+      }
+      printf("Corrente entrando na pos %lu e saindo na pos %lu\n", refInp, refOut);
+  		gsl_vector_set(vI, refInp, input);
+  		gsl_vector_set(vI, refOut, -input);
   		gsl_linalg_LU_solve(global, permutation, vI, vP);
   		gsl_vector_fprintf(stdout, vP, "%f");
   		FILE *resultado;

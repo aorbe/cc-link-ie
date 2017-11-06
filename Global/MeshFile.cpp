@@ -51,7 +51,14 @@ void MeshFile::showLocal(unsigned long number)
   printf("Elemento Não Encontrado\n");
 }
 
-
+unsigned long MeshFile::getNodeReference(unsigned long nodeNumber)
+{
+  std::map<unsigned long, unsigned long>::iterator elem;
+  elem = gNodes.find(nodeNumber);
+  if (gNodes.end() != elem)
+    return elem->second;
+  return getNodesSize() + 1; 
+}
 
 
 

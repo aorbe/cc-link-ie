@@ -51,5 +51,6 @@ public:
   void calcGlobal(gsl_matrix *global, long double condutividade);
   void showLocal(unsigned long number);
   unsigned int getNodesSize();
+  unsigned long getNodeReference(unsigned long nodeNumber);
 };
 #endif /* MESHFILE_H_ */
