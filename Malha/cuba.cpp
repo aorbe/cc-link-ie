@@ -95,43 +95,76 @@ int main(int argc, char* argv[])
 	fgeo = fopen(fgeoName, "w+");
 
 	
-	unsigned int iPonto = 1;
+	unsigned int iPonto = qtde + 1;
 	unsigned int iLinha = 1;
+  unsigned int iEletrodo = 1;
 	unsigned int iObj = 1;
+  unsigned int iPlano = 1;
 	char eName[] = "ELETRODO000";
   double raio = diametro/2;
   double eleAng = largura/raio;
+  double eleDist = 0.5;
 
 	fprintf(fgeo, "Point(%d) = {0.0, 0.0, 0.0};\n", iPonto++);
 
 	for(double ang=0; ang < 2*M_PI; ang = ang + (2*M_PI)/(double)qtde) {
+    // Pontos do Eletrodo
+    if (mode == 3) {
+      fprintf(fgeo, "Point(%d) = {%f, %f, %f, %f};\n", iPonto++,  raio*sin(ang), raio*cos(ang), altura, ele_size);
+      fprintf(fgeo, "Point(%d) = {%f, %f, %f, %f};\n", iPonto++,  raio*sin(ang+eleAng), raio*cos(ang+eleAng), altura, ele_size);
+    }
 		fprintf(fgeo, "Point(%d) = {%f, %f, 0.0, %f};\n", iPonto++,  raio*sin(ang), raio*cos(ang), ele_size);
 		fprintf(fgeo, "Point(%d) = {%f, %f, 0.0, %f};\n", iPonto++,  raio*sin(ang+eleAng), raio*cos(ang+eleAng), ele_size);
-		fprintf(fgeo, "Point(%d) = {%f, %f, %f, %f};\n", iPonto++,  raio*sin(ang), raio*cos(ang), altura, ele_size);
-		fprintf(fgeo, "Point(%d) = {%f, %f, %f, %f};\n", iPonto++,  raio*sin(ang+eleAng), raio*cos(ang+eleAng), altura, ele_size);
 
-		fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-4, iPonto-3);
-		fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-3, iPonto-1);
-		fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-1, iPonto-2);
-		fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-2, iPonto-4);
+    if (mode == 3) {
+  		fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-3, iPonto-4);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-1, iPonto-3);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-4, iPonto-2);
+    }
+	  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-2, iPonto-1);
 
+    // Eletrodo
+    if (mode == 3) {
+		  fprintf(fgeo, "Point(%d) = {%f, %f, %f, %f};\n", iEletrodo++, (raio+eleDist)*sin(ang+eleAng/2), (raio+eleDist)*cos(ang+eleAng/2), altura/2, ele_size);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++,  iPonto-2, iEletrodo-1, ele_size);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++,  iPonto-1, iEletrodo-1, ele_size);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++,  iPonto-4, iEletrodo-1, ele_size);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++,  iPonto-3, iEletrodo-1, ele_size);
+    } else {
+		  fprintf(fgeo, "Point(%d) = {%f, %f, 0.0, %f};\n", iEletrodo++, (raio+eleDist)*sin(ang+eleAng/2), (raio+eleDist)*cos(ang+eleAng/2), ele_size);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iEletrodo-1, iPonto-2, ele_size);
+		  fprintf(fgeo, "Line(%d) = {%d, %d};\n", iLinha++, iPonto-1, iEletrodo-1, ele_size);
+      fprintf(fgeo, "Line Loop(%d) = {%d, %d, %d};\n", iObj++, iLinha-2, iLinha-3, iLinha-1);
+      fprintf(fgeo, "Plane Surface(%d) = {%d};\n", iObj-1, iObj-1);
+    }
 		//fprintf(fgeo, "Line Loop(%d) = {%d, %d, %d, %d};\n", iObj, iLinha-4, iLinha-3, iLinha-2, iLinha-1);
 		//fprintf(fgeo, "Plane Surface(%d) = {%d};\n", iObj, iObj);
 		//sprintf(eName, "ELETRODO%03d", iLinha/4);
 		//fprintf(fgeo, "Physical Surface(\"%s\") = {%d};\n", eName, iObj++);
   }
   
+  // Arcos entre eletrodos 
   unsigned int idxContorno = iLinha;
-	for(unsigned int pos=3; pos < (qtde*4)-4; pos+=4) {
-		fprintf(fgeo, "Circle(%d) = {%d, %d, %d};\n", iLinha++, pos, 1, pos+3);	
+  unsigned int iCircleIncr = 2;
+  if (mode == 3)
+    iCircleIncr = 4;
+	for(unsigned int pos=3; pos < (qtde*iCircleIncr)+1; pos+=iCircleIncr) {
+		fprintf(fgeo, "Circle(%d) = {%d, %d, %d};\n", iLinha++, pos + qtde, qtde + 1, pos + qtde + 1);	
   }
-  fprintf(fgeo, "Circle(%d) = {%d, %d, %d};\n", iLinha++, qtde*4-1, 1, 2);
+  fprintf(fgeo, "Circle(%d) = {%d, %d, %d};\n", iLinha++, qtde*iCircleIncr + qtde + 1 , qtde + 1, qtde + 2);
 
+  // Contorno da Cuba
   fprintf(fgeo, "Line Loop (%d) = {%d, %d", iObj, 1, idxContorno);
+  int iPassoLinha = 3;
+  if (mode == 3) {
+    iPassoLinha += 2;
+  }
   for(unsigned int pos=idxContorno+1; pos<idxContorno+qtde; pos++) {
-    fprintf(fgeo, ", %d, %d", (pos - idxContorno)*4+1, pos);
+    fprintf(fgeo, ", %d, %d", (pos - idxContorno)*iPassoLinha+1, pos);
   }
   fprintf(fgeo, "};\n");
+
+  // Plano
   fprintf(fgeo, "Plane Surface(%d) = {%d};\n", iObj, iObj);
 
   if (mode == 3)
