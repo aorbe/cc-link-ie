@@ -52,5 +52,6 @@ public:
   void showLocal(unsigned long number);
   unsigned int getNodesSize();
   unsigned long getNodeReference(unsigned long nodeNumber);
+  void showImage();
 };
 #endif /* MESHFILE_H_ */

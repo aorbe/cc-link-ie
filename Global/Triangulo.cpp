@@ -31,9 +31,9 @@ int Triangulo::calcLocalMatrix(long double _condutividade, std::map<unsigned lon
 	calcArea(list_nodes);
 	// H=1.5cm
 	k = 0.015 / (condutividade * 4.0 * area);
-  Node *lNode[3];
-  for(unsigned int x=0; x<nNodes; x++)
-    lNode[x] = &list_nodes->at(nodes[x]);
+	Node *lNode[3];
+	for(unsigned int x=0; x<nNodes; x++)
+		lNode[x] = &list_nodes->at(nodes[x]);
 
 	local[0] = k * ((lNode[0]->y - lNode[2]->y)*(lNode[1]->y - lNode[2]->y) +  (lNode[2]->x - lNode[1]->x)*(lNode[2]->x - lNode[1]->x));
 	local[1] = k * ((lNode[1]->y - lNode[2]->y)*(lNode[2]->y - lNode[0]->y) +  (lNode[2]->x - lNode[1]->x)*(lNode[0]->x - lNode[2]->x));
@@ -47,6 +47,6 @@ int Triangulo::calcLocalMatrix(long double _condutividade, std::map<unsigned lon
 	local[7] = local[5];
 	local[8] = k * ((lNode[0]->y - lNode[1]->y)*(lNode[0]->y - lNode[1]->y) +  (lNode[1]->x - lNode[0]->x)*(lNode[1]->x - lNode[0]->x));
   
-  return 1;
+	return 1;
 }
 
