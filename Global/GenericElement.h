@@ -30,16 +30,19 @@ protected:
   unsigned int nNodes;
   unsigned long *nodes;
 
-	double condutividade;
+  double condutividade;
   double determinante(const double va[3], const double vb[3], const double vc[3]);
 
 public:
-  virtual int calcLocalMatrix(long double condutividade, std::map<unsigned long,Node> *list_nodes) = 0;
+  virtual int calcLocalMatrix(std::map<unsigned long,Node> *list_nodes) = 0;
+  virtual double getFatorCondut() = 0;
+  virtual double getDerivCondut() = 0;
   
   GenericElement(unsigned long number, unsigned int type, unsigned int nTags);
   GenericElement(GenericElement &element);
-  ~GenericElement();
-  void updateGlobal(gsl_matrix *matrix, std::map<unsigned long,unsigned long> *hash_nodes);
+  virtual ~GenericElement();
+  void updateGlobal(gsl_matrix *matrix, std::map<unsigned long,unsigned long> *hash_nodes, double condutividade);
+  void updateJacobian(gsl_matrix *matrix, std::map<unsigned long,unsigned long> *hash_nodes, double condutividade);
   
   int readNodes(char* buf);
   unsigned long getNumber();
@@ -50,7 +53,6 @@ public:
   void setTag(unsigned int pos, int value);
   int getTag(unsigned int pos);
   void showLocal();
-
 
 };
 

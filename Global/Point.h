@@ -18,10 +18,11 @@ public:
     nNodes = 1;
     nodes = new unsigned long[nNodes];
   }
-	~Point();
-	int calcLocalMatrix(long double condutividade, std::map<unsigned long,Node> *nodes) {(void) condutividade; (void) nodes; return 0;}
-	void updateGlobal(gsl_matrix *matrix) {(void) matrix; }
+	~Point() {}
+	int calcLocalMatrix( std::map<unsigned long,Node> *nodes) {(void) nodes; return 0;}
 	void showLocal() {};
+	double getFatorCondut() {return 1;}
+	double getDerivCondut() {return 1;}
 
 };
 

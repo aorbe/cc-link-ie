@@ -148,83 +148,71 @@ void MeshFile::ProcessNodes()
 // Essas classes são armazenadas na lista "elements"
 void MeshFile::ProcessElements()
 {
-  static std::map<unsigned int, unsigned int> stats;
-  std::map<unsigned int, unsigned int>::iterator it;
-  std::map<unsigned long, unsigned long>::iterator elem;
-  unsigned long number;
-  unsigned int type;
-  unsigned int nTags;
-  int iPos = 0, iAux= 0;
-  GenericElement *e;
+	std::map<unsigned int, unsigned int>::iterator it;
+	std::map<unsigned long, unsigned long>::iterator elem;
+	unsigned long number;
+	unsigned int type;
+	unsigned int nTags;
+	int iPos = 0, iAux= 0;
+	GenericElement *e;
 
-  // Verificação redundante se já foram lidos todos os elementos
-  if(iElements < getLength(&nElements)) {
-    sscanf(buf, "%ld %u %d%n", &number, &type, &nTags, &iPos);
-      
-    // A quantidade de elementos de cada tipo é registrada em "stats" 
-    it = stats.find(type);
-    if (stats.end() != it) {
-      it->second++;
-    } else {
-      stats[type] = 1;
-    }
+	// Verificação redundante se já foram lidos todos os elementos
+	if(iElements < getLength(&nElements)) {
+		sscanf(buf, "%ld %u %d%n", &number, &type, &nTags, &iPos);
 
-    // De acordo com o tipo, uma classe é instanciada
-    switch (type) {
-    case 2:
-      e = new Triangulo(number, type, nTags);
-      break;
-    case 3:
-      e = new Tetraedro(number, type, nTags);
-      break;
-    case 4:
-      e = new Tetraedro(number, type, nTags);
-      break;
-    case 15:
-      e = new Point(number, type, nTags);
-      break;
-    default:
-    case 1:
-      e = new Line(number, type, nTags);
-      break;
-    }
+		// De acordo com o tipo, uma classe é instanciada
+		switch (type) {
+			case 2:
+				e = new Triangulo(number, type, nTags);
+				break;
+			case 3:
+				e = new Tetraedro(number, type, nTags);
+				break;
+			case 4:
+				e = new Tetraedro(number, type, nTags);
+				break;
+			case 15:
+				e = new Point(number, type, nTags);
+				break;
+			default:
+			case 1:
+				e = new Line(number, type, nTags);
+				break;
+		}
 
-    // Leitura dos tags
-    int tag;
-    for(unsigned int x=0; x<e->getNumberTags(); x++) {
-      sscanf(&buf[iPos], "%d%n", &tag, &iAux);
-      iPos += iAux;
-      e->setTag(x, tag);
-    }
+		// Leitura dos tags
+		int tag;
+		for(unsigned int x=0; x<e->getNumberTags(); x++) {
+			sscanf(&buf[iPos], "%d%n", &tag, &iAux);
+			iPos += iAux;
+			e->setTag(x, tag);
+		}
 
-    // A respectiva classe realiza a leitura dos nos
-    e->readNodes(&buf[iPos]);
+		// A respectiva classe realiza a leitura dos nos
+		e->readNodes(&buf[iPos]);
 
-    // No modo 2D somente elementos tipo 2 serão calculados
-    // No modo 3D somente elementos tipo 3 serão calculados
-    if (((type==2) && (mode==2)) || ((type==3) && (mode==3))) {
-      // Para cada nó pertencente a elemento calculado tem um número sequencial
-      // associado indicando a coluna/linha relativa na matriz global
-      for(unsigned int x=0; x<e->getNumberNodes(); x++) {
-        unsigned long n = e->getNode(x);        
-        elem = gNodes.find(n);
-        if (gNodes.end() == elem) {
-          gNodes[n] = gNodes.size() - 1;
-        } 
-      }
-      
-    }      
-    elements.push_back(e);
-    iElements++;
-  }
-  // Apresentação dos totais relativos aos elementos do arquivo
-  if (iElements == getLength(&nElements)) {
-    printf("Foram lidos %ld Elementos\n", iElements);
-    for (it=stats.begin(); it!=stats.end(); ++it) {
-      printf("* %u elementos do tipo %u\n", it->second, it->first);
-    }
-    printf("Total de %lu hashs\n", gNodes.size());
-  }
+		// No modo 2D somente elementos tipo 2 serão calculados
+		// No modo 3D somente elementos tipo 3 serão calculados
+		if (((type==2) && (mode==2)) || ((type==3) && (mode==3))) {
+			// Para cada nó pertencente a elemento calculado tem um número sequencial
+			// associado indicando a coluna/linha relativa na matriz global
+			for(unsigned int x=0; x<e->getNumberNodes(); x++) {
+				unsigned long n = e->getNode(x);
+				elem = gNodes.find(n);
+				if (gNodes.end() == elem) {
+				gNodes[n] = gNodes.size() - 1;
+			}
+		}
+		elements.push_back(e);
+	}
+	else
+		delete e;
+		iElements++;
+	}
+	// Apresentação dos totais relativos aos elementos do arquivo
+	if (iElements == getLength(&nElements)) {
+		printf("Foram lidos %ld Elementos\n", iElements);
+	}
 }
 
 void MeshFile::ProcessPeriodic()
@@ -253,24 +241,23 @@ void MeshFile::ProcessElementData()
   }
 }
 
-void MeshFile::ProcessElementNodeData()
-{
-  for(;iStrElementNodeData < getLength(&nStrElementNodeData); iStrElementNodeData++) {
-  }
-  for(;iRealElementNodeData < getLength(&nRealElementNodeData); iRealElementNodeData++) {
-  }
-  for(;iIntElementNodeData < getLength(&nIntElementNodeData); iIntElementNodeData++) {
-  }
+void MeshFile::ProcessElementNodeData() {
+	for(;iStrElementNodeData < getLength(&nStrElementNodeData); iStrElementNodeData++) {
+	}
+	for(;iRealElementNodeData < getLength(&nRealElementNodeData); iRealElementNodeData++) {
+	}
+	for(;iIntElementNodeData < getLength(&nIntElementNodeData); iIntElementNodeData++) {
+	}
 }
 
 void MeshFile::ProcessInterpolationScheme()
 {
-  printf("%s", buf);
+	printf("%s", buf);
 }
 
 unsigned int MeshFile::getNodesSize()
 {
-  return gNodes.size();
+	return gNodes.size();
 }
 
 

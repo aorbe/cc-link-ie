@@ -16,11 +16,13 @@ class Tetraedro: public GenericElement
 	void calcVolume(std::map<unsigned long,Node> *nodes);
 
 public:
-  Tetraedro(unsigned long number, unsigned int type, unsigned int nTags);
-  ~Tetraedro();
-  int calcLocalMatrix(long double condutividade, std::map<unsigned long,Node> *list_nodes);
-  void updateGlobal(gsl_matrix *matrix);
-  unsigned long getNumber();
+	Tetraedro(unsigned long number, unsigned int type, unsigned int nTags);
+	~Tetraedro();
+	int calcLocalMatrix(std::map<unsigned long,Node> *list_nodes);
+	void updateGlobal(gsl_matrix *matrix);
+	unsigned long getNumber();
+	double getFatorCondut();
+	double getDerivCondut();
 };
 
 #endif /* TETRAEDRO_H_ */

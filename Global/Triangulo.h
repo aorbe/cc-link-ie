@@ -18,7 +18,9 @@ class Triangulo: public GenericElement
 public:
 	Triangulo(unsigned long number, unsigned int type, unsigned int nTags);
 	~Triangulo();
-	int calcLocalMatrix(long double condutividade, std::map<unsigned long,Node> *nodes);
+	int calcLocalMatrix(std::map<unsigned long,Node> *nodes);
+	double getFatorCondut();
+	double getDerivCondut();
 };
 
 

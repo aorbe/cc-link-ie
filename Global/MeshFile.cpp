@@ -22,20 +22,39 @@ long MeshFile::getLength(long *n)
   return 0;
 }
 
-void MeshFile::calcGlobal(gsl_matrix *global, long double condutividade)
+void MeshFile::calcGlobal(gsl_matrix *global, gsl_vector* condutividade)
 {
-  (void) global;
-  std::list<GenericElement*>::iterator it;
-  for (it=elements.begin(); it!=elements.end(); ++it) {
-    printf("Calculando Elemento %lu (Tipo %d)...", (*it)->getNumber(), (*it)->getType());
-    if ((*it)->calcLocalMatrix(condutividade, &nodes)) {
-      printf(" Atualizando ... ");
-      (*it)->updateGlobal(global, &gNodes);
-      printf("Pronto\n");
-    } else {
-      printf("Descartado\n");
-    }
-  }
+	std::list<GenericElement*>::iterator it;
+	int idx = 0;
+	for (it=elements.begin(); it!=elements.end(); ++it) {
+		printf("Calculando Elem %06lu (Tipo %d)...", (*it)->getNumber(), (*it)->getType());
+		if ((*it)->calcLocalMatrix(&nodes)) {
+			printf(" Atualizando (%e) ... ", gsl_vector_get(condutividade, idx));
+			(*it)->updateGlobal(global, &gNodes, gsl_vector_get(condutividade, idx));
+			printf("Pronto\n");
+		} else {
+			printf("ERRO\n");
+		}
+		idx++;
+	}
+	printf("\n");
+}
+
+void MeshFile::calcJacobian(gsl_matrix *jacobian, gsl_vector* condutividade) {
+	std::list<GenericElement*>::iterator it;
+	int idx = 0;
+	for (it=elements.begin(); it!=elements.end(); ++it) {
+		printf("Calculando Elemento %06lu (Tipo %d)...", (*it)->getNumber(), (*it)->getType());
+		if ((*it)->calcLocalMatrix(&nodes)) {
+			printf(" Atualizando ... ");
+			(*it)->updateJacobian(jacobian, &gNodes, gsl_vector_get(condutividade, idx));
+			printf("Pronto\r");
+		} else {
+			printf("ERRO\n");
+		}
+		idx++;
+	}
+	printf("\n");
 }
 
 void MeshFile::showLocal(unsigned long number)
@@ -60,5 +79,7 @@ unsigned long MeshFile::getNodeReference(unsigned long nodeNumber)
   return getNodesSize() + 1; 
 }
 
-
+unsigned int MeshFile::getElementSize() {
+	return elements.size();
+}
 

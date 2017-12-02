@@ -6,7 +6,7 @@ LD  = g++
 INCLUDE = -I./
 CPP_FLAGS := -Wall -Wextra -std=c++0x -c $(INCLUDE)
 LD_FLAGS := -Wall -Wextra -lgsl -lblas
-LIB_FLAGS := -lgsl -lblas
+LIB_FLAGS := -lgsl -lblas -lps
 
 CPP_OBJS = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 

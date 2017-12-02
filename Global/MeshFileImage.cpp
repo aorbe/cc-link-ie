@@ -9,8 +9,19 @@
 #include <functional>
 #include <iostream>
 #include <libps/pslib.h>
+#include <libps/pslib-mp.h>
 
 #include "Node.h"
+
+struct spotcolor {
+	int id;
+	char* name;
+	char* colorspace;
+	float c1;
+	float c2;
+	float c3;
+	float c4;
+};
 
 int colorline(PSDoc *ps, float leftborder, struct spotcolor *spot) {
 	int i;
@@ -36,6 +47,7 @@ int colorline(PSDoc *ps, float leftborder, struct spotcolor *spot) {
 }
 
 void MeshFile::showImage() {
+	int psfont;
 	PSDoc *ps;
 	PS_boot();
 	ps = PS_new();
@@ -51,7 +63,7 @@ void MeshFile::showImage() {
 
 	psfont = PS_findfont(ps, "Helvetica", "", 0);
 	PS_setfont(ps, psfont, 7.0);
-	for(i=1; i<=10; i++) {
+	for(int i=1; i<=10; i++) {
 		char buffer[10];
 		sprintf(buffer, "Teste");
 		PS_show_xy(ps, buffer, 60, 55+i*65);
@@ -59,7 +71,7 @@ void MeshFile::showImage() {
 
 	/* Find Size */
 	unsigned long min_x, max_x, min_y, max_y;
-	std::list<unsigned long, Node>::iterator elem;
+	std::map<unsigned long, Node>::iterator elem;
 	elem = nodes.begin();
 	min_x = elem->second.x;
 	max_x = elem->second.x;
@@ -82,14 +94,14 @@ void MeshFile::showImage() {
 	PS_set_parameter(ps, "transition", "wipe");
 	PS_set_value(ps, "duration", 0.5);
 
-  std::list<GenericElement*>::iterator it;
-  std::map<unsigned long, unsigned long>::iterator elem;
-  elem = gNodes.find(nodeNumber);
-  if (gNodes.end() != elem)
-    return elem->second;
-  return getNodesSize() + 1;
+//  std::list<GenericElement*>::iterator it;
+//  std::map<unsigned long, unsigned long>::iterator elem;
+//  elem = gNodes.find(nodeNumber);
+//  if (gNodes.end() != elem)
+//    return elem->second;
+//  return getNodesSize() + 1;
 
-	PS_translate(ps, radius + margin, radius + margin);
+	//PS_translate(ps, radius + margin, radius + margin);
 
 	/* minute strokes */
 	PS_save(ps);

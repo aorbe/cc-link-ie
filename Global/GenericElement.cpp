@@ -113,20 +113,44 @@ void GenericElement::showLocal()
 	}
 }
 
-void GenericElement::updateGlobal(gsl_matrix *matrix, std::map<unsigned long,unsigned long> *hash_nodes)
+void GenericElement::updateGlobal(gsl_matrix *matrix, std::map<unsigned long,unsigned long> *hash_nodes,
+		double condutividade)
 {
-  printf("Validando Nos...");
-  for(unsigned int x=0; x<nNodes; x++) {
-    if(hash_nodes->find(nodes[x]) == hash_nodes->end()) {
-      printf("Falha! No %lu inexistente\n", nodes[x]);
-      return;
-    }
-  }
-  for(unsigned int x=0; x<nNodes; x++) {
-    for(unsigned int y=0; y<nNodes; y++) {
-      double d = gsl_matrix_get(matrix, hash_nodes->at(nodes[x]), hash_nodes->at(nodes[y]));
-      d += local[x*nNodes + y];    	
-      gsl_matrix_set(matrix, hash_nodes->at(nodes[x]), hash_nodes->at(nodes[y]), d);
-    }
-  }
+	this->condutividade = condutividade;
+	printf("Validando ...");
+	for(unsigned int x=0; x<nNodes; x++) {
+	if(hash_nodes->find(nodes[x]) == hash_nodes->end()) {
+			printf("Falha! No %lu inexistente\n", nodes[x]);
+			return;
+		}
+	}
+
+	for(unsigned int x=0; x<nNodes; x++) {
+		for(unsigned int y=0; y<nNodes; y++) {
+			double d = gsl_matrix_get(matrix, hash_nodes->at(nodes[x]), hash_nodes->at(nodes[y]));
+			d += (getFatorCondut()* local[x*nNodes + y]);
+			gsl_matrix_set(matrix, hash_nodes->at(nodes[x]), hash_nodes->at(nodes[y]), d);
+		}
+	}
+}
+
+void GenericElement::updateJacobian(gsl_matrix *matrix, std::map<unsigned long,unsigned long> *hash_nodes,
+		double condutividade)
+{
+	this->condutividade = condutividade;
+	printf("Validando Nos...");
+	for(unsigned int x=0; x<nNodes; x++) {
+	if(hash_nodes->find(nodes[x]) == hash_nodes->end()) {
+			printf("Falha! No %lu inexistente\n", nodes[x]);
+			return;
+		}
+	}
+
+	for(unsigned int x=0; x<nNodes; x++) {
+		for(unsigned int y=0; y<nNodes; y++) {
+			double d = gsl_matrix_get(matrix, hash_nodes->at(nodes[x]), hash_nodes->at(nodes[y]));
+			d += (getDerivCondut()* local[x*nNodes + y]);
+			gsl_matrix_set(matrix, hash_nodes->at(nodes[x]), hash_nodes->at(nodes[y]), d);
+		}
+	}
 }

@@ -48,10 +48,12 @@ protected:
 public:
   MeshFile(int mode);
   int ReadFile(const char* fileName);
-  void calcGlobal(gsl_matrix *global, long double condutividade);
+  void calcGlobal(gsl_matrix *global, gsl_vector* condutividade);
+  void calcJacobian(gsl_matrix *jacobian, gsl_vector* condutividade);
   void showLocal(unsigned long number);
   unsigned int getNodesSize();
   unsigned long getNodeReference(unsigned long nodeNumber);
   void showImage();
+  unsigned int getElementSize();
 };
 #endif /* MESHFILE_H_ */
