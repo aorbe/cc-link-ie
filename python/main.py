@@ -1,21 +1,15 @@
 # Processamento de Malha
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_vector.h>
-#include <map>
-#include "triangle.h"
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # pip install gmshparser
 import pymesh
 import meshio
 import numpy as np
+from Element import GenericElement, Tetrahedron
+import matplotlib.pyplot as plt
+
 
 # using namespace std;
 
@@ -71,45 +65,56 @@ def main():
 	mapNodes = []
 	index_nodes = 0
 
-	list_nodes = {}
-	for node in mesh.points:
-		print(node)
+	# list_nodes = {}
+	# for node in mesh.points:
+	# 	print(node)
 		# print("{} {}".format(node.get_tag(), node.get_number_of_nodes()))
 		# if (node.get_tag()== 2):
 			# for n in node.get_nodes():
 			# 	list_nodes.insert(n.. n.get_coordinates())
 
-	min_node = 10000
-	max_node = 0
-	dict_node = {}
-	elems = None
+	nNodes = len(mesh.points)
+	m_global = np.zeros((nNodes, nNodes))
 	for element in mesh.cells:
-		if (element.type == 'triangle'):
-			elems = element
-			for e in element.data:
-				for num in e:
-					if (dict_node.get(num) == None):
-						dict_node[num] = num
-					if (num > max_node):
-						max_node = num
-					if (num < min_node):
-						min_node = num
-	print("Max {} Min {}".format(max_node, min_node))
-	num_nodes = len(dict_node)
-				
-	print("Num Elementos: {}".format(num_nodes))
-	mGlobal = np.ndarray([num_nodes, num_nodes])
+		if (element.type == 'tetra'):
+			for x, e in zip(range(0,len(element.data)), element.data):
+				obj = Tetrahedron(x, element.type, e)
+				for y, p in zip(range(0, len(e.data)), e.data):
+					obj.setPoint(y, mesh.points[p])
+				obj.calcLocalMatrix()
+				# obj.showLocal()
+				obj.updateGlobal(m_global, condutividade=10)
+				mapNodes.append(obj)
+	
+	m_inverse = np.linalg.inv(m_global)
+	
+	m_current = np.zeros((nNodes))
+	m_current[0] = 1
+	m_current[3] = -1
 
+	m_voltage = np.linalg.solve(m_global, m_current)
+	# print(m_voltage)
+	# plt.plot(m_voltage)
+	# plt.show()
 
-	for e in elems.data:
-		local_nodes = [mesh.points[e[2]], mesh.points[e[1]], mesh.points[e[0]]]
-		area = 0
-		area =  local_nodes[0][0] * local_nodes[1][1] - local_nodes[1][0] * local_nodes[0][1]
-		area += local_nodes[2][0] * local_nodes[0][1] - local_nodes[0][0] * local_nodes[2][1]
-		area += local_nodes[1][0] * local_nodes[2][1] - local_nodes[2][0] * local_nodes[1][1]
-		if (area <= 0):
-			print("Erro Elemento {} (A ({})<= 0)".format(1, area))
-			#print(" Nos {%lu} {%lu} {%lu}\n".format(e));
+	# f = open("voltage.msh", "w")
+	# f.write('$MeshFormat\n2 0 8\n$EndMeshFormat\n$NodeData\n1\n"Tensao (V)"\n1\n0.0\n3\n0\n1\n')
+	# f.write('{}\n'.format(len(mesh.points)))
+	# for x in range(0, len(mesh.points)):
+	# 	f.write('{} {}\n'.format(x+1, m_voltage[x]))
+	# f.write('$EndNodeData\n')
+	# f.close()
+	# # print(min_num)	
+	# print(len(mapNodes))
+	# for e in mapNodes:
+	# 	local_nodes = [mesh.points[e[2]], mesh.points[e[1]], mesh.points[e[0]]]
+	# 	area = 0
+	# 	area =  local_nodes[0][0] * local_nodes[1][1] - local_nodes[1][0] * local_nodes[0][1]
+	# 	area += local_nodes[2][0] * local_nodes[0][1] - local_nodes[0][0] * local_nodes[2][1]
+	# 	area += local_nodes[1][0] * local_nodes[2][1] - local_nodes[2][0] * local_nodes[1][1]
+	# 	if (area <= 0):
+	# 		print("Erro Elemento {} (A ({})<= 0)".format(1, area))
+	# 		#print(" Nos {%lu} {%lu} {%lu}\n".format(e));
 		
 
 
